@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import styles  from './signin.css'
+import styles  from './signin.css';
+import { firebase } from '../../firebase';
 
 import FormField from '../widgets/FormFields/formField'
 
@@ -88,10 +89,77 @@ class Signin extends Component {
     }
     return error
   }
+  
+  submitForm = (event,type) =>{
+    event.preventDefault()
+    if(type !== null){
+      let dataToSubmit = {};
+      let formIsValid = true;
+
+      for(let key in this.state.formData){
+        dataToSubmit[key] = this.state.formData[key].value
+      }
+
+      for(let key in this.state.formData){
+        formIsValid = this.state.formData[key].valid && formIsValid;
+      }
+
+      if(formIsValid){
+        this.setState({
+          loading:true,
+          registerError: ''
+        })
+        if(type){
+           firebase.auth()
+           .signInWithEmailAndPassword(
+            dataToSubmit.email,
+            dataToSubmit.password
+           ).then(()=>{
+             this.props.history.push('/')
+           }).catch(error =>{
+            this.setState({
+              loading:false,
+              registerError: ''
+            })
+           })
+        } else {
+            firebase.auth()
+            .createUserWithEmailAndPassword(
+              dataToSubmit.email,
+              dataToSubmit.password
+            ).then(() =>{
+              this.props.history.push('/')
+            }).catch(error =>{
+              this.setState({
+                loading:false,
+                registerError: error.message
+              })
+            })
+          
+        }
+      }
+    }
+
+  }
+
+  submitButton = () =>(
+    this.state.loading ?
+      'loading...'
+    :
+    <div>
+      <button onClick={(event)=> this.submitForm(event, false) }>Register now</button>
+      <button onClick={(event)=>this.submitForm(event,true)}>Log in</button>
+    </div>
+  )
+  showError = () => (
+    this.state.registerError !== '' ?
+  <div className={styles.error}>{this.state.registerError}</div>
+  : ''
+  )
   render() {
     return (
       <div className={styles.logContainer}>
-          <form>
+          <form onSubmit ={(event) => this.submitForm(event, null)}>
             <h2>Register/Login</h2>
             <FormField 
               id={'email'}
@@ -103,6 +171,8 @@ class Signin extends Component {
               formData={this.state.formData.password}
               change={(element)=> this.updateForm(element)}
             />
+            {this.submitButton()}
+            {this.showError()}
           </form>
       </div>
     )
