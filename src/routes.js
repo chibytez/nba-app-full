@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import Home from './components/Home/home';
 import Layout from './hoc/Layout/layout';
@@ -19,7 +19,7 @@ const  Routes = (props) => {
         return(
             <Layout user={props.user}>
                 <Switch>
-                <PublicRoutes {...props} restricted={false} path="/" exact component={Home}/>
+                    <PublicRoutes {...props} restricted={false} path="/" exact component={Home}/>
                     <PublicRoutes {...props} restricted={false} path="/news" exact component={NewsMain}/>
                     <PublicRoutes {...props} restricted={false} path="/articles/:id" exact component={NewsArticle}/>
                     <PublicRoutes {...props} restricted={false} path="/videos/:id" exact component={VideoArticle}/>
